@@ -1,0 +1,38 @@
+version: '3.0'
+
+services:
+#  app-container:
+#    build:
+#      context: ./app
+#      dockerfile: Dockerfile
+#
+#    ports:
+#      - 5000:5000
+  postgres-db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=wikimedia_db
+    ports:
+      - 5432:5432
+  airflow-etl-container:
+    image: apache/airflow:2.10.2-python3.11
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./airflow_data/wikimedia:/var/tmp
+      - ./logs:/opt/airflow
+      - ./scripts:/opt/airflow/scripts
+      - ./airflow_data/imdb:/opt/airflow/imdb
+
+    ports:
+      - 8080:8080
+
+    command: bash -c 'airflow db init && airflow users create --username admin --password admin --firstname thang --lastname nguyen --role Admin --email hoangthang0403@gmail.com; airflow webserver & airflow scheduler'
+
+volumes:
+  dags:
+  airflow_data:
+  logs:
+  imdb:
+
